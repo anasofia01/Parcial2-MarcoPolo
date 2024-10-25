@@ -10,7 +10,6 @@ const {
 	checkedHandleRestartGame,
 	onGetPlayersList,
 } = require('../event-handlers/gameHandlers');
-const { assignRoles } = require('../utils/helpers');
 
 const gameEvents = (socket, io) => {
 	socket.on('joinGame', joinGameHandler(socket, db, io));
@@ -24,6 +23,12 @@ const gameEvents = (socket, io) => {
 	socket.on('onSelectPolo', onSelectPoloHandler(socket, db, io));
 
 	socket.on('restartGame', handleRestartGame(socket, db, io));
+
+	socket.on('sortAlphabetically', handleSortAlphabetically(socket, db, io));
+
+	socket.on('checkedHandleRestartGame', checkedHandleRestartGame(socket, db, io));
+
+	socket.on('getPlayersList', onGetPlayersList(socket, db, io));
 };
 
 module.exports = { gameEvents };

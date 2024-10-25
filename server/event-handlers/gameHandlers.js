@@ -54,7 +54,7 @@ const onSelectPoloHandler = (socket, db, io) => {
 			marco.score += 50;
 			poloSelected.score -= 10;
 			io.emit('notifyGameOver', {
-				message: `El marco es ${marco.nickname} ha ganado, ${poloSelected.nickname} ha perdido`,
+				message: `El marco es ${marco.nickname} ha ganado, ${poloSelected.nickname} ha perdido}`,
 				players: db.players,
 			});
 		} else {
@@ -103,6 +103,48 @@ const checkedForWinner = (io, players) => {
 	}
 };
 
+const onGetPlayersList = (socket, db, io) => {
+	return () => {
+		const playerWebPosition = db.players.map((player, index) => ({
+			position: index + 1,
+			nickname: player.nickname,
+			score: player.score,
+		}));
+		socket.emit('getPlayersList', {
+			players: playerWebPosition,
+		});
+	};
+};
+
+const handleSortAlphabetically = (socket, db, io) => {
+	return () => {
+		const sortedPlayers = db.players.sort((a, b) => a.nickname.localeCompare(b.nickname));
+
+		io.emit('updatePlayerList', {
+			players: sortedPlayers.map((player, index) => ({
+				position: index + 1,
+				nickname: player.nickname,
+				score: player.score,
+			})),
+		});
+	};
+};
+
+const checkedHandleRestartGame = (socket, db, io) => {
+	return () => {
+		const playerWithHighScore = db.players.find((player) => player.score >= 100);
+
+		if (playerWithHighScore) {
+			db.players.forEach((player) => {
+				player.score = 0;
+				player.role = null;
+			});
+
+			io.emit('restartGame', db.players);
+		}
+	};
+};
+
 module.exports = {
 	joinGameHandler,
 	startGameHandler,
@@ -110,4 +152,7 @@ module.exports = {
 	notifyPoloHandler,
 	onSelectPoloHandler,
 	handleRestartGame,
+	onGetPlayersList,
+	handleSortAlphabetically,
+	checkedHandleRestartGame,
 };
